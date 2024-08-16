@@ -102,7 +102,6 @@ begin
 end;
 go
 
-select * from StationSLog;
 --insert into ProcStations
 exec ProcStations @StationName='Uttora North',@Location='Uttora',@PlatformCount='2',@OpeningDate='2022-12-29';
 exec ProcStations @StationName='Uttora Center',@Location='Uttora',@PlatformCount='2',@OpeningDate='2023-02-18';
@@ -246,6 +245,104 @@ create table Lines (
 );
 go
 
+--line store procedure 
+create proc addLines(
+	@LineName varchar(80),
+	@Color varchar(20),
+	@Length decimal(5,2),
+	@OpeningDate date
+)
+as
+begin
+	 insert into lines(LineName,Color,Length,OpeningDate)
+	 values(@LineName,@Color,@Length,@OpeningDate)
+end;
+go
+
+--lines log table
+create table LineLogs(
+	LineLogId int primary key identity(1,1),
+	LineId int references Lines(LineId),
+	Action varchar(90),
+	ActionDate date
+);
+go
+
+--insert line log table
+create trigger triLineLogs
+on Lines
+after insert
+as
+begin
+	declare @LineId int;
+	select @LineId = inserted.LineId
+	from inserted;
+
+	insert into LineLogs(LineId, Action,ActionDate)
+	values(@LineId, 'Line added', getdate());
+end;
+go
+--lines table validation trigger
+create trigger triLineValid
+on Lines
+instead of insert
+as
+begin
+	if exists(select * from lines where  LineName = (select LineName from inserted) and Color = (select Color from inserted))
+	begin
+		raiserror('line alredy exists ' , 16, 1);
+	end
+	else
+	begin
+		insert into Lines (LineName, Color, Length,OpeningDate)
+		select LineName, Color, Length,OpeningDate from inserted
+	end
+end;
+go
+
+--insert lines table
+exec addLines @LineName='MRT Line 6',@Color='Red',@Length='21.26',@OpeningDate='2022-12-29';
+--update lines
+select * from Lines;
+go
+
+create proc procUpdateLine(
+	@LineId int,
+	@LineName varchar(80),
+	@Color varchar(20),
+	@Length decimal(5,2),
+	@OpeningDate date
+)
+as
+begin
+	update Lines
+	set LineName= @LineName,
+	Color=@Color,
+	Length=@Length,
+	OpeningDate =@OpeningDate
+	where LineId = @LineId
+end;
+go
+
+--line update trigger
+create trigger triUpdateLine
+on Lines
+after update
+as
+begin
+	declare @LineId int
+	select @LineId = inserted.LineId
+	from inserted;
+	insert into LineLogs (LineId, Action, ActionDate)
+	values(@LineId, 'Line Updated', getdate())
+end;
+go
+
+--update line tabe
+exec procUpdateLine @LineId=1, @LineName='MRT Line 6',@Color='Green',@Length='21.26',@OpeningDate='2022-12-29';
+select * from lineLogs;
+go
+
 --routes table
 create table Routes (
 	RouteId int primary key identity(1,1),
@@ -256,6 +353,103 @@ create table Routes (
 	Distance decimal(5,2)
 );
 go
+
+--create proce routes table
+create proc procRoutes(
+	@LineId int,
+	@StartStationId int,
+	@EndStationId int,
+	@RouteName varchar(50),
+	@Distance decimal(5,2)
+)
+as
+begin
+	if @StartStationId = @EndStationId
+	begin
+		raiserror('Start and end station can not be same',16,2);
+		return;
+	end
+	
+	
+		insert into Routes(LineId, StartStationId,EndStationId,RouteName,Distance)
+		values(@LineId, @StartStationId,@EndStationId,@RouteName,@Distance)
+
+end;
+go
+--valid trigger Routes table
+create trigger triRouteValid
+on Routes
+instead of insert
+as
+begin
+	if exists (select 1 from routes where LineId = (select LineId from inserted) and StartStationId = (select StartStationId from inserted) and EndStationId = (select EndStationId from inserted))
+	begin
+		raiserror('Route is alredy exists',16,1);
+	end
+	--inesrt 
+	insert into Routes(LineId, StartStationId, EndStationId, RouteName, Distance)
+	select LineId, StartStationId, EndStationId, RouteName, Distance from inserted;
+end;
+go
+
+--route log table
+create table RouteLogs(
+	RouteLogId int primary key identity(1,1),
+	RouteId int references Routes(RouteId),
+	Action varchar(90),
+	ActionDate date
+);
+go
+--route log trigger
+create trigger triRouteLog
+on Routes
+after insert , update, delete
+as
+begin
+	declare @RouteId int, @Action varchar(90);
+	if exists(select * from inserted)
+	begin
+		select @RouteId =RouteId from inserted;
+		if exists (select * from deleted)
+		begin 
+			set @Action = 'Update Route'
+		end
+		else
+		begin
+			set @Action ='Inserted Route'
+		end
+	end	
+	else if exists(select * from deleted)
+	begin
+		select @RouteId =RouteId from deleted
+		set @Action = 'Deleted Route';
+	end
+
+	--insert log
+	insert into RouteLogs(RouteId, Action,ActionDate)
+	values (@RouteId, @Action, getdate());
+end;
+go
+
+--insert into routes table on proc
+exec procRoutes @LIneId =1,@StartStationId=1,@EndStationId=2,@RouteName='Route 1',@Distance=1.2;
+exec procRoutes @LIneId =1,@StartStationId=2,@EndStationId=3,@RouteName='Route 2',@Distance=1.5;
+exec procRoutes @LIneId =1,@StartStationId=3,@EndStationId=4,@RouteName='Route 3',@Distance=1.8;
+exec procRoutes @LIneId =1,@StartStationId=4,@EndStationId=5,@RouteName='Route 4',@Distance=2.0;
+exec procRoutes @LIneId =1,@StartStationId=5,@EndStationId=6,@RouteName='Route 5',@Distance=1.4;
+exec procRoutes @LIneId =1,@StartStationId=6,@EndStationId=7,@RouteName='Route 6',@Distance=1.7;
+exec procRoutes @LIneId =1,@StartStationId=7,@EndStationId=8,@RouteName='Route 7',@Distance=1.5;
+exec procRoutes @LIneId =1,@StartStationId=8,@EndStationId=9,@RouteName='Route 8',@Distance=2.3;
+exec procRoutes @LIneId =1,@StartStationId=9,@EndStationId=10,@RouteName='Route 9',@Distance=1.9;
+exec procRoutes @LIneId =1,@StartStationId=10,@EndStationId=11,@RouteName='Route 10',@Distance=1.6;
+exec procRoutes @LIneId =1,@StartStationId=11,@EndStationId=12,@RouteName='Route 11',@Distance=1.8;
+exec procRoutes @LIneId =1,@StartStationId=12,@EndStationId=13,@RouteName='Route 12',@Distance=1.3;
+exec procRoutes @LIneId =1,@StartStationId=13,@EndStationId=14,@RouteName='Route 13',@Distance=2.2;
+exec procRoutes @LIneId =1,@StartStationId=14,@EndStationId=15,@RouteName='Route 14',@Distance=1.7;
+exec procRoutes @LIneId =1,@StartStationId=15,@EndStationId=16,@RouteName='Route 15',@Distance=1.5;
+
+
+
 --train table
 
 create table Trains(
