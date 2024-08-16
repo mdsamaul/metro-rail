@@ -56,7 +56,7 @@ go
 --create log table
 create table StationsLog(
 	StationsLog int primary key identity(1,1),
-	StationId int references Stations(StationId),
+	StationId int,
 	Action varchar(30),
 	ActionDate date
 );
@@ -133,6 +133,8 @@ create table Platforms(
 );
 go
 
+select * from Platforms;
+go
 
 
 --insert store procedure
@@ -159,7 +161,7 @@ go
 --up down platformlog table
 create table platformslog(
 	platformslog int primary key identity(1,1),
-	PlatformId int references Platforms(PlatformId),
+	PlatformId int,
 	Action varchar(90),
 	ActionDate date
 );
@@ -262,7 +264,7 @@ go
 --lines log table
 create table LineLogs(
 	LineLogId int primary key identity(1,1),
-	LineId int references Lines(LineId),
+	LineId int,
 	Action varchar(90),
 	ActionDate date
 );
@@ -315,12 +317,20 @@ create proc procUpdateLine(
 )
 as
 begin
+
+	if exists (select 1 from Lines where @Color = Color)
+	begin 
+		raiserror ('allready color exists',16,1);
+	end
+	else
+	begin
 	update Lines
-	set LineName= @LineName,
-	Color=@Color,
-	Length=@Length,
-	OpeningDate =@OpeningDate
-	where LineId = @LineId
+		set LineName= @LineName,
+		Color=@Color,
+		Length=@Length,
+		OpeningDate =@OpeningDate
+		where LineId = @LineId
+	end
 end;
 go
 
@@ -339,10 +349,10 @@ end;
 go
 
 --update line tabe
-exec procUpdateLine @LineId=1, @LineName='MRT Line 6',@Color='Green',@Length='21.26',@OpeningDate='2022-12-29';
+exec procUpdateLine @LineId=1, @LineName='MRT Line 6',@Color='Greens',@Length='21.26',@OpeningDate='2022-12-29';
 select * from lineLogs;
 go
-
+select * from lines;
 --routes table
 create table Routes (
 	RouteId int primary key identity(1,1),
@@ -368,9 +378,7 @@ begin
 	begin
 		raiserror('Start and end station can not be same',16,2);
 		return;
-	end
-	
-	
+	end	
 		insert into Routes(LineId, StartStationId,EndStationId,RouteName,Distance)
 		values(@LineId, @StartStationId,@EndStationId,@RouteName,@Distance)
 
@@ -395,7 +403,7 @@ go
 --route log table
 create table RouteLogs(
 	RouteLogId int primary key identity(1,1),
-	RouteId int references Routes(RouteId),
+	RouteId int,
 	Action varchar(90),
 	ActionDate date
 );
@@ -462,16 +470,306 @@ create table Trains(
 );
 go
 
+--insert procedure
+create proc procTrains(
+	@TrainNumber varchar(20),
+	@Capacity int,
+	@TrainType varchar(20),
+	@Manufacturer varchar(100),
+	@InServiceDate date
+)
+as
+begin
+	insert into Trains(TrainNumber, Capacity, TrainType,Manufacturer,InServiceDate)
+	values(@TrainNumber, @Capacity, @TrainType,@Manufacturer,@InServiceDate)
+end;
+go
+
+--update train store procedure
+create proc procTrainUpdate(
+	@TrainId int,
+	@TrainNumber varchar(20),
+	@Capacity int,
+	@TrainType varchar(20),
+	@Manufacturer varchar(100),
+	@InServiceDate date
+)
+as
+begin
+update Trains	  
+set   
+	@TrainNumber   =TrainNumber,   
+	@Capacity 	   =Capacity, 	   
+	@TrainType 	   =TrainType, 	   
+	@Manufacturer  =Manufacturer,  
+	@InServiceDate =InServiceDate 
+	where TrainId = @TrainId;
+end;
+go
+
+--delete train store procedure
+create proc procDeleteTrain(
+	@TrainId int
+)
+as
+begin
+	delete from Trains
+	where @TrainId = TrainId
+end;
+go
+
+--create train log table
+create table TrainLogs(
+	TrainLogIn int primary key identity(1,1),
+	TrainId int,
+	Action varchar(90),
+	ActionDate date
+);
+go
+
+--trigger Train insert
+create trigger triTrainInster
+on Trains
+after insert, update, delete
+as
+begin
+	declare @TrainId int , @Action varchar(90);
+	if exists(select * from inserted)
+	begin
+	select @TrainId = inserted.TrainId 
+	from inserted;
+	if exists (select * from deleted)
+	begin
+		set @Action ='Update Train';
+	end
+	else
+	begin
+		set @Action ='Insert Train';
+	end
+	end
+	else if exists(select * from deleted)
+	begin
+		select @TrainId = TrainId 
+		from deleted;
+		set @Action ='Delete Train';
+	end
+
+	--insert train
+	insert into TrainLogs (TrainId, Action ,ActionDate)
+	values(@TrainId, @Action, getdate());
+end;
+go
+
+--train valid trigger
+create trigger triInserTrainValid
+on Trains
+instead of insert
+as
+begin 
+	if exists (select 1 from inserted where TrainNumber in (select TrainNumber from Trains))
+	begin
+		raiserror('Train Number already exists',16,1);
+	end
+	else
+	begin
+		insert into Trains(TrainNumber, Capacity,TrainType, Manufacturer,InServiceDate)
+		select TrainNumber, Capacity,TrainType, Manufacturer,InServiceDate from inserted;
+	end
+end;
+go
+
+select * from trains;
+---insert into train procedure 
+exec procTrains @TrainNumber='MRT6-T01', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T02', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T03', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T04', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T05', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T06', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T07', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T08', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T09', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T10', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T11', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T12', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T13', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T14', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+exec procTrains @TrainNumber='MRT6-T15', @Capacity=2308, @TrainType='Electric', @Manufacturer='Kawasaki Heavy Industries Ltd.', @InServiceDate='2022-12-01';
+
+select * from trains;
 --Schedules table
+
 create table Schedules (
-	SchedulesId int primary key identity(1,1),
+	ScheduleId int primary key identity(1,1),
 	TrainId int references Trains(TrainId),
+	PlatformId int references Platforms(PlatformId),
 	RouteId int references Routes(RouteId),
 	DepartureTime time,
 	ArrivalTime time,
 	Frequency varchar(20)
 );
 go
+
+--create Schedules store procedure
+create proc procSchedules(
+	@TrainId int,
+	@PlatformId int,
+	@RouteId int ,
+	@DepartureTime time,
+	@ArrivalTime time,
+	@Frequency varchar(20)
+)
+as
+begin
+	insert into Schedules(TrainId,PlatformId,RouteId,DepartureTime,ArrivalTime,Frequency)
+	values(@TrainId,@PlatformId,@RouteId,@DepartureTime,@ArrivalTime,@Frequency)
+end;
+go
+
+--porce schedules update
+
+create proc procUpdateSchedule(
+	@ScheduleId int,
+	@PlatformId int,
+	@TrainId int  ,
+	@RouteId int ,
+	@DepartureTime time,
+	@ArrivalTime time,
+	@Frequency varchar(20)
+)
+as
+begin
+update Schedules
+
+set
+	TrainId =@TrainId,
+	PlatformId=@PlatformId,
+	RouteId =@RouteId,
+	DepartureTime =@DepartureTime,
+	ArrivalTime =@ArrivalTime,
+	Frequency =@Frequency
+	where @ScheduleId=ScheduleId
+end;
+go
+
+--delete schedules
+
+create proc procScheduleDelete(
+	@ScheduleId int
+)
+as
+begin
+
+--delete schedules table
+delete from Schedules
+where @ScheduleId = ScheduleId
+end;
+go
+
+--create scheduleLogs table
+create table ScheduleLogs(
+	ScheduleLogId int primary key identity(1,1),
+	ScheduleId int,
+	Action varchar(70),
+	ActionDate date
+);
+go
+--schdule insert trigger
+
+
+create trigger triSchedules
+on Schedules
+after  insert , update, delete
+as
+begin 
+declare @ScheduleId int, @Action varchar(70);
+if exists (select * from inserted)
+begin
+select @ScheduleId = ScheduleId from inserted;
+if exists (select * from deleted)
+begin
+	set @Action ='Updeted Schedule';
+end
+else 
+begin
+	set @Action ='Insert Schedule'; 
+end
+end
+else if exists(select * from deleted)
+begin
+select @ScheduleId = ScheduleId from deleted;
+set @Action ='delete Schedule';
+end
+--insert log 
+ insert into ScheduleLogs(ScheduleId, Action,ActionDate)
+ values(@ScheduleId, @Action,getdate())
+end;
+go
+
+--trigger schedule validation
+create trigger triScheduleValie
+on Schedules
+instead of insert
+as
+begin
+	if exists(select 1 from inserted where DepartureTime >= ArrivalTime)
+	begin
+	raiserror('Arival time must be grether then Departure time', 16,1);
+	rollback;
+	end
+	--insert value
+	insert into Schedules(TrainId,PlatformId,RouteId,DepartureTime,ArrivalTime,Frequency)
+	select TrainId,PlatformId,RouteId,DepartureTime,ArrivalTime,Frequency from inserted;
+end;
+go
+
+
+--inesrt schedules
+-- Insert a new schedule
+EXEC procSchedules @TrainId = 1, @PlatformId = 1,@RouteId = 1,@DepartureTime = '08:00', @ArrivalTime = '10:00',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 2,@RouteId = 2,@DepartureTime = '08:05', @ArrivalTime = '09:55',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 3,@RouteId = 3,@DepartureTime = '08:10', @ArrivalTime = '09:50',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 4,@RouteId = 4,@DepartureTime = '08:15', @ArrivalTime = '09:45',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 5,@RouteId = 5,@DepartureTime = '08:20', @ArrivalTime = '09:40',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 6,@RouteId = 6,@DepartureTime = '08:25', @ArrivalTime = '09:40',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 7,@RouteId = 7,@DepartureTime = '08:30', @ArrivalTime = '09:35',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 8,@RouteId = 8,@DepartureTime = '08:35', @ArrivalTime = '09:30',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 9,@RouteId = 9,@DepartureTime = '08:40', @ArrivalTime = '09:25',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 10,@RouteId = 10,@DepartureTime = '08:45', @ArrivalTime = '09:20',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 11,@RouteId = 11,@DepartureTime = '08:50', @ArrivalTime = '09:15',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 12,@RouteId = 12,@DepartureTime = '08:55', @ArrivalTime = '09:10',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 13,@RouteId = 13,@DepartureTime = '09:00', @ArrivalTime = '09:05',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 14,@RouteId = 14,@DepartureTime = '09:05', @ArrivalTime = '09:00',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 15,@RouteId = 15,@DepartureTime = '09:15', @ArrivalTime = '08:55',@Frequency = 'Every Day';
+
+
+select  * from  schedules;
+select * from trains;
+select * from routes;
+select * from Platforms;
+select * from Stations;
+
+
+
+--update
+EXEC procUpdateSchedule 
+    @ScheduleId = 1,
+    @TrainId = 2,
+    @RouteId = 3,
+    @DepartureTime = '09:00:00',
+    @ArrivalTime = '09:45:00',
+    @Frequency = 'Weekdays';
+go
+
+--delete
+EXEC procScheduleDelete 
+    @ScheduleId = 1;
+	go
+
+
+
+
+
 --passengers
 create table Passengers(
 	PassengerId int primary key identity(1,1),
