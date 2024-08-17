@@ -104,3 +104,19 @@ CREATE TABLE Tickets (
     TicketPrice DECIMAL(10,2) NOT NULL
 );
 go
+
+--fares table
+CREATE TABLE Fares (
+    FareId INT PRIMARY KEY IDENTITY(1,1),
+    RouteId INT NOT NULL REFERENCES Routes(RouteId),
+    FareAmount DECIMAL(10,2) NOT NULL,
+    FareType NVARCHAR(50) NOT NULL
+);
+--fare log table
+CREATE TABLE FareLog (
+    LogId INT PRIMARY KEY IDENTITY(1,1),
+    FareId INT NOT NULL REFERENCES Fares(FareId),
+    OldFareAmount DECIMAL(10,2) NOT NULL,
+    NewFareAmount DECIMAL(10,2) NOT NULL,
+    ChangeDate DATE NOT NULL
+);
