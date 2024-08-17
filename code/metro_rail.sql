@@ -1154,6 +1154,7 @@ begin
 	where FareId = @FareId
 end;
 go
+
 --fare valid trigger
 create trigger triValidFares
 on Fares
@@ -1168,7 +1169,7 @@ begin
 		rollback transaction;
 	end
 	else 
-	begin
+	begin 
 		insert into Fares(RouteId,FareAmount,FareType)
 		select RouteId,FareAmount,FareType from inserted;
 	end
@@ -1219,20 +1220,147 @@ EXEC procUpdateFares @FareId = 3, @RouteId = 1, @FareAmount = 55.00, @FareType =
 EXEC procDeleteFares @FareId = 3;
 select * from fares
 select * from fareLog
+drop  TABLE TrainStations
+
 
 --Train Stations
 CREATE TABLE TrainStations (
+	TrainStationId int identity(1,1),
     TrainID int references Trains(TrainID),
     StationID int references Stations(StationID),
     ArrivalTime time,
     DepartureTime time,
-    primary key (TrainID, StationID, ArrivalTime)
+    primary key (TrainStationId,TrainID, StationID, ArrivalTime)
+);
+go
+
+--log TrainStations table
+create table TrainStationLogs(
+	TrainStationLogid int primary key identity(1,1),
+	TrainStationId int,
+	Action varchar(60),
+	ActionDate date
 );
 go
 
 
-
---start dml 
-
-select * from trains;
+--insert TrainStations
+create proc procInsertTrainStations(
+	@TrainID int,
+    @StationID int,
+    @ArrivalTime time,
+    @DepartureTime time
+)
+as
+begin
+	insert into TrainStations(TrainID,StationId,ArrivalTime,DepartureTime)
+	values(@TrainID,@StationId,@ArrivalTime,@DepartureTime);
+end;
 go
+
+--proc TrainStations update
+create proc procUpdateTrainStations(
+	@TrainStationId int,
+	@TrainID int,
+    @StationID int,
+    @ArrivalTime time,
+    @DepartureTime time
+)
+as
+begin
+	update TrainStations
+	set 
+	TrainID = @TrainID, 
+	StationID=@StationID,
+	ArrivalTime=@ArrivalTime,
+	DepartureTime = @DepartureTime
+	where TrainStationId = @TrainStationId
+end;
+go
+
+--delete TrainStations proc
+create proc procDeleteTrainStations(
+	@TrainStationId int
+)
+as
+begin
+	delete from TrainStations
+	where TrainStationId = @TrainStationId;
+end;
+go
+--retrive TrainStations
+create proc procGetTrainStations(
+	@TrainStationId int
+)
+as
+begin
+	select * from TrainStations
+	where TrainStationId = @TrainStationId
+end;
+go
+
+--TrainStations valid trigger
+create trigger triValidTrainStations
+on TrainStations
+instead of insert
+as
+begin
+ if exists(select 1 from inserted where  ArrivalTime >= DepartureTime)
+	begin
+	raiserror('Arival time must be grether then Departure time', 16,1);
+	rollback;
+	end
+	--insert value
+	else 
+	begin 
+	insert into TrainStations(TrainID,StationId,ArrivalTime,DepartureTime)
+		select TrainID,StationId,ArrivalTime,DepartureTime from inserted;
+	end
+end;
+go
+
+--insert update delete after lot table insert
+create trigger triInsertUpdateDeleteTrainStations
+on TrainStations
+after insert, update, delete
+as
+begin
+	declare @TrainStationId int, @Action varchar(60);
+	if exists(select * from inserted)
+	begin
+	select @TrainStationId = TrainStationId from inserted;
+	if exists(select * from deleted)
+	begin
+		set @Action = 'Train Station  updated';
+	end
+	else 
+	begin
+		set @Action ='Train StationId Insert';
+	end
+	end
+	else if exists(select * from deleted)		
+	begin
+	select @TrainStationId =deleted.TrainStationId from deleted
+	 set @Action = 'Train StationId Delete';
+	end
+
+	--insert log
+	insert into TrainStationLogs(TrainStationId, Action, ActionDate)
+	values(@TrainStationId,@Action,getdate()); 
+end;
+go
+
+
+-- Insert TrainStations
+EXEC procInsertTrainStations @TrainID = 1, @StationID = 1, @ArrivalTime = '08:00:00', @DepartureTime = '08:30:00';
+EXEC procInsertTrainStations @TrainID = 1, @StationID = 2, @ArrivalTime = '09:00:00', @DepartureTime = '09:15:00';
+EXEC procInsertTrainStations @TrainID = 2, @StationID = 3, @ArrivalTime = '10:00:00', @DepartureTime = '10:20:00';
+
+-- Update TrainStations
+EXEC procUpdateTrainStations @TrainStationId = 1, @TrainID = 1, @StationID = 1, @ArrivalTime = '08:05:00', @DepartureTime = '08:35:00';
+-- Delete TrainStations
+EXEC procDeleteTrainStations @TrainStationId = 2;
+
+
+select * from TrainStations;
+select * from TrainStationLogs
