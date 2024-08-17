@@ -798,6 +798,8 @@ create table Passengers(
 );
 go
 
+
+
 --passenger log table
 create table PassengerLogs(
 	PassengerLogId int primary key identity(1,1),
@@ -932,6 +934,10 @@ go
 
 
 exec procInsertPassengers @Name='samaul',@age=24, @Gender='M',@ContactNumber='01981154473';
+exec procInsertPassengers @Name='shihan',@age=24, @Gender='M',@ContactNumber='01981154473';
+exec procInsertPassengers @Name='arafat',@age=24, @Gender='M',@ContactNumber='01981154473';
+exec procInsertPassengers @Name='nobab',@age=24, @Gender='M',@ContactNumber='01981154473';
+exec procInsertPassengers @Name='shariar',@age=24, @Gender='M',@ContactNumber='01981154473';
 exec procUpdatePassengers @PassengerId = 1, @Name='Shovon',@age=24, @Gender='M',@ContactNumber='01981154478';
 exec procPassengerDelete @PassengerId = 1;
 exec ProcGetPassengerDetails @PassengerId = 2;
@@ -1220,7 +1226,7 @@ EXEC procUpdateFares @FareId = 3, @RouteId = 1, @FareAmount = 55.00, @FareType =
 EXEC procDeleteFares @FareId = 3;
 select * from fares
 select * from fareLog
-drop  TABLE TrainStations
+
 
 
 --Train Stations
