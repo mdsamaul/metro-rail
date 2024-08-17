@@ -712,7 +712,7 @@ on Schedules
 instead of insert
 as
 begin
-	if exists(select 1 from inserted where DepartureTime >= ArrivalTime)
+	if exists(select 1 from inserted where  ArrivalTime >= DepartureTime)
 	begin
 	raiserror('Arival time must be grether then Departure time', 16,1);
 	rollback;
@@ -726,22 +726,39 @@ go
 
 --inesrt schedules
 -- Insert a new schedule
-EXEC procSchedules @TrainId = 1, @PlatformId = 1,@RouteId = 1,@DepartureTime = '08:00', @ArrivalTime = '10:00',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 2,@RouteId = 2,@DepartureTime = '08:05', @ArrivalTime = '09:55',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 3,@RouteId = 3,@DepartureTime = '08:10', @ArrivalTime = '09:50',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 4,@RouteId = 4,@DepartureTime = '08:15', @ArrivalTime = '09:45',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 5,@RouteId = 5,@DepartureTime = '08:20', @ArrivalTime = '09:40',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 6,@RouteId = 6,@DepartureTime = '08:25', @ArrivalTime = '09:40',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 7,@RouteId = 7,@DepartureTime = '08:30', @ArrivalTime = '09:35',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 8,@RouteId = 8,@DepartureTime = '08:35', @ArrivalTime = '09:30',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 9,@RouteId = 9,@DepartureTime = '08:40', @ArrivalTime = '09:25',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 10,@RouteId = 10,@DepartureTime = '08:45', @ArrivalTime = '09:20',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 11,@RouteId = 11,@DepartureTime = '08:50', @ArrivalTime = '09:15',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 12,@RouteId = 12,@DepartureTime = '08:55', @ArrivalTime = '09:10',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 13,@RouteId = 13,@DepartureTime = '09:00', @ArrivalTime = '09:05',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 14,@RouteId = 14,@DepartureTime = '09:05', @ArrivalTime = '09:00',@Frequency = 'Every Day';
-EXEC procSchedules @TrainId = 1, @PlatformId = 15,@RouteId = 15,@DepartureTime = '09:15', @ArrivalTime = '08:55',@Frequency = 'Every Day';
+--up train
+EXEC procSchedules @TrainId = 1, @PlatformId = 1,@RouteId = 1,@DepartureTime = '08:01', @ArrivalTime = '08:00',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 2,@RouteId = 2,@DepartureTime = '08:06', @ArrivalTime = '08:05',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 3,@RouteId = 3,@DepartureTime = '08:11', @ArrivalTime = '08:10',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 4,@RouteId = 4,@DepartureTime = '08:16', @ArrivalTime = '08:15',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 5,@RouteId = 5,@DepartureTime = '08:21', @ArrivalTime = '08:20',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 6,@RouteId = 6,@DepartureTime = '08:26', @ArrivalTime = '08:25',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 7,@RouteId = 7,@DepartureTime = '08:31', @ArrivalTime = '08:30',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 8,@RouteId = 8,@DepartureTime = '08:36', @ArrivalTime = '08:35',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 9,@RouteId = 9,@DepartureTime = '08:41', @ArrivalTime = '08:40',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 10,@RouteId = 10,@DepartureTime = '08:46', @ArrivalTime = '08:45',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 11,@RouteId = 11,@DepartureTime = '08:51', @ArrivalTime = '08:50',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 12,@RouteId = 12,@DepartureTime = '08:56', @ArrivalTime = '08:55',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 13,@RouteId = 13,@DepartureTime = '09:01', @ArrivalTime = '09:00',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 14,@RouteId = 14,@DepartureTime = '09:06', @ArrivalTime = '09:05',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 1, @PlatformId = 15,@RouteId = 15,@DepartureTime = '09:11', @ArrivalTime = '09:10',@Frequency = 'Every Day';
 
+--down train
+EXEC procSchedules @TrainId = 15, @PlatformId = 32,@RouteId = 15,@DepartureTime = '08:01', @ArrivalTime = '08:00',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 31,@RouteId = 14,@DepartureTime = '08:06', @ArrivalTime = '08:05',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 30,@RouteId = 13,@DepartureTime = '08:11', @ArrivalTime = '08:10',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 29,@RouteId = 12,@DepartureTime = '08:16', @ArrivalTime = '08:15',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 28,@RouteId = 11,@DepartureTime = '08:21', @ArrivalTime = '08:20',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 27,@RouteId = 10,@DepartureTime = '08:26', @ArrivalTime = '08:25',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 26,@RouteId = 9,@DepartureTime = '08:31', @ArrivalTime = '08:30',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 25,@RouteId = 8,@DepartureTime = '08:36', @ArrivalTime = '08:35',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 24,@RouteId = 7,@DepartureTime = '08:41', @ArrivalTime = '08:40',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 23,@RouteId = 6,@DepartureTime = '08:46', @ArrivalTime = '08:45',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 22,@RouteId = 5,@DepartureTime = '08:51', @ArrivalTime = '08:50',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 21,@RouteId = 4,@DepartureTime = '08:56', @ArrivalTime = '08:55',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 20,@RouteId = 3,@DepartureTime = '09:01', @ArrivalTime = '09:00',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 19,@RouteId = 2,@DepartureTime = '09:06', @ArrivalTime = '09:05',@Frequency = 'Every Day';
+EXEC procSchedules @TrainId = 15, @PlatformId = 18,@RouteId = 1,@DepartureTime = '09:11', @ArrivalTime = '09:10',@Frequency = 'Every Day';
 
 select  * from  schedules;
 select * from trains;
@@ -751,8 +768,9 @@ select * from Stations;
 
 
 
+
 --update
-EXEC procUpdateSchedule 
+/*EXEC procUpdateSchedule 
     @ScheduleId = 1,
     @TrainId = 2,
     @RouteId = 3,
@@ -766,7 +784,7 @@ EXEC procScheduleDelete
     @ScheduleId = 1;
 	go
 
-
+	*/
 
 
 
@@ -780,6 +798,148 @@ create table Passengers(
 );
 go
 
+--passenger log table
+create table PassengerLogs(
+	PassengerLogId int primary key identity(1,1),
+	PassengerId int,
+	Action varchar(90),
+	ActionDate date
+);
+go
+
+--insert passenger proc
+create proc procInsertPassengers(
+	@Name varchar(100),
+	@age int,
+	@Gender varchar(10),
+	@ContactNumber varchar(15)
+)
+as
+begin
+	insert into Passengers(Name,age,Gender,ContactNumber)
+	values(@Name,@age,@Gender,@ContactNumber)
+end;
+go
+
+--passenger update
+create proc procUpdatePassengers(
+	@PassengerId int,
+	@Name varchar(100),
+	@age int,
+	@Gender varchar(10),
+	@ContactNumber varchar(15)
+)
+as
+begin
+	update Passengers
+	set Name = @Name,age=@age, Gender=@Gender, ContactNumber = @ContactNumber
+	where PassengerId = @PassengerId;
+
+end;
+go
+--passender delete
+create proc procPassengerDelete(
+	@PassengerId int
+)
+as
+begin
+	delete from Passengers
+	where PassengerId = @PassengerId
+end;
+go
+--retrive a passenger
+create proc ProcGetPassengerDetails(
+	@PassengerId int
+)
+as
+begin
+	select * from Passengers
+	where PassengerId = @PassengerId
+end
+go
+
+
+--function valid phone number
+create function validPhone(@Phone varchar(30))
+returns int
+begin
+	declare @Result int;
+	set @Result =1;
+	if @Phone like ('%[^0-9]%')
+	begin
+	set @Result = 0;
+	end
+	else if len(@Phone) !=11
+	begin
+	 set @Result =0;
+	end
+	--result return
+	return @Result;
+end;
+go
+
+--select  dbo.validPhone('01981154473');
+--valid passenger
+create trigger triPassengerValid
+on Passengers
+instead of insert
+as
+begin
+	declare @Phone varchar(30);
+	select @Phone = inserted.ContactNumber
+	from inserted;
+	if (dbo.validPhone(@Phone)=0)
+	begin
+		raiserror('not a valie phone number', 16,1);
+		rollback transaction;
+	end
+	else
+	begin
+		insert into Passengers(Name,age,Gender,ContactNumber)
+		select Name,age,Gender,ContactNumber from inserted;
+	end
+end;
+go
+
+--insert log file
+create trigger triInserUpdateDelete
+on Passengers
+after insert, update, delete
+as
+begin
+	declare @PassengerId int , @Action varchar(60);
+	if exists(select * from inserted)
+	begin
+		select @PassengerId = inserted.PassengerId from inserted;
+		if exists(select * from deleted)
+		begin
+			set @Action = 'Passenger Updated';
+		end
+		else
+		begin
+			set @Action = 'Passenger Inserted';
+		end
+	end
+	else if exists(select * from deleted)
+	begin
+	set @Action = 'Passenger Deleted';
+	end
+	--
+	insert into PassengerLogs(PassengerId, Action, ActionDate)
+	values (@PassengerId, @Action, getdate());
+end;
+go
+
+
+exec procInsertPassengers @Name='samaul',@age=24, @Gender='M',@ContactNumber='01981154473';
+exec procUpdatePassengers @PassengerId = 1, @Name='Shovon',@age=24, @Gender='M',@ContactNumber='01981154478';
+exec procPassengerDelete @PassengerId = 1;
+exec ProcGetPassengerDetails @PassengerId = 2;
+
+
+select * from passengers;
+
+
 --Tickets table 
 create table Tickets (
 	TicketsId int primary key identity(1,1),
@@ -791,6 +951,135 @@ create table Tickets (
 	PurchaseDate date
 );
 go
+
+--log table tickets
+ 	create table TicketLogs(
+	TicketLogId int primary key identity(1,1),
+	TicketId int,
+	Action varchar(60),
+	ActionDate date
+);
+go
+
+--insert Tickets
+create proc procInsertTickets(
+	@PassengerId int ,
+	@RouteId int ,
+	@TrainId int,
+	@TicketType varchar(20),
+	@Price decimal(8,2),
+	@PurchaseDate date
+)
+as
+begin
+	insert into Tickets(PassengerId,RouteId,TrainId,TicketType,Price,PurchaseDate)
+	values(@PassengerId,@RouteId,@TrainId,@TicketType,@Price,@PurchaseDate);
+end;
+go
+
+--proc tickets update
+create proc procUpdateTickets(
+	@TicketId int,
+	@PassengerId int ,
+	@RouteId int ,
+	@TrainId int,
+	@TicketType varchar(20),
+	@Price decimal(8,2),
+	@PurchaseDate date
+)
+as
+begin
+	update Tickets
+	set PassengerId =@PassengerId,
+	RouteId = @RouteId, 
+	TrainId=@TrainId,
+	TicketType=@TicketType,
+	Price=@Price,
+	PurchaseDate=@PurchaseDate
+	where TicketsId = @TicketId;
+end;
+go
+
+--delete ticket proc
+create proc procDeleteTicket(
+	@TicketId int
+)
+as
+begin
+	delete from Tickets
+	where TicketsId = @TicketId;
+end;
+go
+--retrive ticket
+create proc procGetTickets(
+	@TicketId int
+)
+as
+begin
+	select * from Tickets
+	where TicketsId = @TicketId
+end;
+go
+--ticket valid trigger
+create trigger triValidTrigger
+on Tickets
+instead of insert
+as
+begin
+ declare @Price decimal(5,2);
+ select @Price = inserted.Price from inserted;
+	if (@Price<=0)
+	begin
+		raiserror('Price must be grether then 0',16,1);
+		rollback transaction;
+	end
+	else 
+	begin
+		insert into Tickets(PassengerId, RouteId, TrainId, TicketType, Price,PurchaseDate)
+		select PassengerId, RouteId, TrainId, TicketType, Price,PurchaseDate from inserted;
+	end
+end;
+go
+
+drop trigger triInsertUpdateDelete
+--insert update delete after lot table insert
+create trigger triInsertUpdateDelete
+on Tickets
+after insert, update, delete
+as
+begin
+	declare @TicketId int, @Action varchar(60);
+	if exists(select * from inserted)
+	begin
+	select @TicketId = TicketsId from inserted;
+	if exists(select * from deleted)
+	begin
+		set @Action = 'Ticket updated';
+	end
+	else 
+	begin
+		set @Action ='ticket Insert';
+	end
+	end
+	else if exists(select * from deleted)		
+	begin
+	select @TicketId =deleted.TicketsId from deleted
+	 set @Action = 'ticket Delete';
+	end
+
+	--insert log
+	insert into TicketLogs(TicketId, Action, ActionDate)
+	values(@TicketId,@Action,getdate()); 
+end;
+go
+
+--insert value 
+exec procInsertTickets @PassengerId=2,@RouteId =1,@TrainId=1,@TicketType='vip',@Price=50,@PurchaseDate='2024-08-18';
+exec procUpdateTickets @TicketId=1, @PassengerId=3,@RouteId =1,@TrainId=1,@TicketType='vip-ac',@Price=150,@PurchaseDate='2024-08-18';
+exec procDeleteTicket @TicketId=1;
+
+select * from tickets;
+select * from Ticketlogs;
 
 --maintenance table
 create table MaintenanceRecords(
