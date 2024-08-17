@@ -244,3 +244,103 @@ VALUES
 (4, 9, 9, '2024-08-16', 40.00), 
 (5, 10, 10, '2024-08-16', 60.00);
 GO
+----- Create stored procedure to get tickets for a specific passenger
+CREATE PROCEDURE GetPassengerTickets
+    @PassengerId INT
+AS
+BEGIN
+    SELECT 
+        T.TicketId,
+        T.PurchaseDate,
+        R.StartingStationId,
+        R.EndingStationId,
+        R.Distance,
+        T.TicketPrice,
+        TR.TrainNumber
+    FROM 
+        Tickets T
+    INNER JOIN 
+        Routes R ON T.RouteId = R.RouteId
+    INNER JOIN 
+        Trains TR ON T.TrainId = TR.TrainId
+    WHERE 
+        T.PassengerId = @PassengerId;
+END;
+GO
+
+
+--get passenger 
+EXEC GetPassengerTickets @PassengerId = 1;
+go
+
+---- Create trigger to check ticket price before inserting
+CREATE TRIGGER trg_CheckTicketPrice
+ON Tickets
+AFTER INSERT
+AS
+BEGIN
+    
+    IF EXISTS (
+        SELECT 1
+        FROM inserted
+        WHERE TicketPrice <= 0
+    )
+    BEGIN
+        RAISERROR ('Ticket price must be greater than zero.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
+
+-- check Tickets 
+INSERT INTO Tickets (PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
+VALUES (1, 1, 1, '2024-08-17', -10.00);
+go
+
+-- Create a function to calculate the total fare for a ticket based on distance
+CREATE FUNCTION CalculateFare (@RouteId INT)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @Fare DECIMAL(10,2);
+    
+    SELECT @Fare = Distance * 5 
+    FROM Routes
+    WHERE RouteId = @RouteId;
+    
+    RETURN @Fare;
+END;
+GO
+
+-- Use the function to calculate fare for route 1
+SELECT dbo.CalculateFare(4) AS TotalFare;
+GO
+
+-- Add a default value to the Status column in the Stations table
+ALTER TABLE Stations
+ADD CONSTRAINT DF_Stations_Status DEFAULT 'Operational' FOR Status;
+GO
+
+-- Add a NOT NULL constraint to the Capacity column in the Trains table
+ALTER TABLE Trains
+ALTER COLUMN Capacity INT NOT NULL;
+GO
+
+
+-- Create an index on the TrainNumber column in the Trains table
+CREATE INDEX IX_TrainNumber ON Trains (TrainNumber);
+GO
+
+
+-- Create a trigger to update the total stations in the Lines table when a new station is added
+CREATE TRIGGER trg_UpdateTotalStations
+ON LineStations
+AFTER INSERT
+AS
+BEGIN
+    UPDATE L
+    SET TotalStations = (SELECT COUNT(*) FROM LineStations WHERE LineId = L.LineId)
+    FROM Lines L
+    WHERE L.LineId IN (SELECT LineId FROM inserted);
+END;
+GO
