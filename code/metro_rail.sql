@@ -1041,7 +1041,6 @@ begin
 end;
 go
 
-drop trigger triInsertUpdateDelete
 --insert update delete after lot table insert
 create trigger triInsertUpdateDelete
 on Tickets
@@ -1081,23 +1080,10 @@ exec procDeleteTicket @TicketId=1;
 select * from tickets;
 select * from Ticketlogs;
 
---maintenance table
-create table MaintenanceRecords(
-	RecordId int primary key identity(1,1),
-	TrainId int references Trains(TrainId),
-	MaintenanceDate date,
-	Details text,
-	cost decimal(10,2)
-);
-go
 
---line stations table
-create table LineStations (
-	LineId int references Lines(LineId),
-	StationId int references Stations(StationId),
-	Sequence int
-);
-go
+
+
+
 --fares table
 create table Fares (
 	FareId int primary key identity(1,1),
@@ -1106,6 +1092,134 @@ create table Fares (
 	FareType varchar(20)
 );
 go
+
+--log fare table
+create table FareLog(
+	FareLog int primary key identity(1,1),
+	FareId int,
+	Action varchar(60),
+	ActionDate date
+);
+go
+
+
+--insert fares
+create proc procInsertFare(
+	@RouteId int,
+	@FareAmount decimal(8,2),
+	@FareType varchar(20)
+)
+as
+begin
+	insert into Fares(RouteId,FareAmount,FareType)
+	values(@RouteId,@FareAmount,@FareType);
+end;
+go
+
+--proc fares update
+create proc procUpdateFares(
+	@FareId int,
+	@RouteId int,
+	@FareAmount decimal(8,2),
+	@FareType varchar(20)
+)
+as
+begin
+	update Fares
+	set 
+	RouteId = @RouteId, 
+	FareAmount=@FareAmount,
+	FareType=@FareType	
+	where FareId = @FareId
+end;
+go
+
+--delete Fare proc
+create proc procDeleteFares(
+	@FareId int
+)
+as
+begin
+	delete from fares
+	where FareId = @FareId;
+end;
+go
+--retrive fare
+create proc procGetFares(
+	@FareId int
+)
+as
+begin
+	select * from Fares
+	where FareId = @FareId
+end;
+go
+--fare valid trigger
+create trigger triValidFares
+on Fares
+instead of insert
+as
+begin
+ declare @Price decimal(5,2);
+ select @Price = inserted.FareAmount from inserted;
+	if (@Price<=0)
+	begin
+		raiserror('Price Amount must be grether then 0',16,1);
+		rollback transaction;
+	end
+	else 
+	begin
+		insert into Fares(RouteId,FareAmount,FareType)
+		select RouteId,FareAmount,FareType from inserted;
+	end
+end;
+go
+
+--insert update delete after lot table insert
+create trigger triInsertUpdateDeleteFare
+on Fares
+after insert, update, delete
+as
+begin
+	declare @FareId int, @Action varchar(60);
+	if exists(select * from inserted)
+	begin
+	select @FareId = FareId from inserted;
+	if exists(select * from deleted)
+	begin
+		set @Action = 'Fare updated';
+	end
+	else 
+	begin
+		set @Action ='Fare Insert';
+	end
+	end
+	else if exists(select * from deleted)		
+	begin
+	select @FareId =deleted.FareId from deleted
+	 set @Action = 'Fare Delete';
+	end
+
+	--insert log
+	insert into FareLog(FareId, Action, ActionDate)
+	values(@FareId,@Action,getdate()); 
+end;
+go
+
+--insert data
+-- Insert Fares
+EXEC procInsertFare @RouteId = 1, @FareAmount = 50.00, @FareType = 'Standard';
+EXEC procInsertFare @RouteId = 2, @FareAmount = 75.00, @FareType = 'Premium';
+EXEC procInsertFare @RouteId = 3, @FareAmount = 60.00, @FareType = 'Standard';
+--update
+EXEC procUpdateFares @FareId = 3, @RouteId = 1, @FareAmount = 55.00, @FareType = 'Standard';
+
+
+--delete
+EXEC procDeleteFares @FareId = 3;
+select * from fares
+select * from fareLog
+
 --Train Stations
 CREATE TABLE TrainStations (
     TrainID int references Trains(TrainID),
@@ -1115,6 +1229,8 @@ CREATE TABLE TrainStations (
     primary key (TrainID, StationID, ArrivalTime)
 );
 go
+
+
 
 --start dml 
 
