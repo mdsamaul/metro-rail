@@ -33,16 +33,16 @@ go
 --create Stations table
 create table Stations (
     StationId int primary key identity(1,1),
-    StationName VARCHAR(100) NOT NULL,
-    Location VARCHAR(150) NOT NULL,
-    OpenedDate DATE NOT NULL,
-	 Status NVARCHAR(50) CHECK (Status IN ('Operational', 'Under Maintenance'))
+    StationName varchar(100) not null,
+    Location varchar(150) not null,
+    OpenedDate DATE not null,
+	 Status varchar(50) check (Status IN ('Operational', 'Under Maintenance'))
 );
 go
 
 --insert into station table
-INSERT INTO Stations (StationName, Location, OpenedDate, Status)
-VALUES 
+insert into Stations (StationName, Location, OpenedDate, Status)
+values 
 ('Uttara North', 'Uttara', '2022-12-28', 'Operational'),
 ('Uttara Center', 'Uttara', '2022-12-28', 'Operational'),
 ('Uttara South', 'Uttara', '2022-12-28', 'Operational'),
@@ -61,32 +61,32 @@ VALUES
 ('Motijheel', 'Dhaka', '2023-03-15', 'Operational');
 go
 --lines table
-CREATE TABLE Lines (
-    LineId INT PRIMARY KEY IDENTITY(1,1),
-    LineName VARCHAR(100) NOT NULL,
-    Color VARCHAR(50) NOT NULL,
-    TotalStations INT NOT NULL
+create table Lines (
+    LineId int primary key identity(1,1),
+    LineName varchar(100) not null,
+    Color varchar(50) not null,
+    TotalStations int not null
 );
 go
 
 --insert into lines table
-INSERT INTO Lines (LineName, Color, TotalStations)
-VALUES 
+insert into Lines (LineName, Color, TotalStations)
+values 
 ('MRT Line 6', 'Red', 17);
 
 --trains table
-CREATE TABLE Trains (
-    TrainId INT PRIMARY KEY IDENTITY(1,1),
-    TrainNumber VARCHAR(50) NOT NULL,
-    LineId INT NOT NULL REFERENCES Lines(LineId),
-    Capacity INT NOT NULL,
-	Status NVARCHAR(50) CHECK (Status IN ('Operational', 'Under Maintenance'))
+create table Trains (
+    TrainId int primary key identity(1,1),
+    TrainNumber varchar(50) not null,
+    LineId int not null references Lines(LineId),
+    Capacity int not null,
+	Status varchar(50) check (Status IN ('Operational', 'Under Maintenance'))
 );
 go
 
 --insert into data trains table
-INSERT INTO Trains (TrainNumber, LineId, Capacity, Status)
-VALUES 
+insert into Trains (TrainNumber, LineId, Capacity, Status)
+values 
 ('Train 1', 1, 300, 'Operational'),
 ('Train 2', 1, 300, 'Operational'),
 ('Train 3', 1, 300, 'Operational'),
@@ -99,22 +99,22 @@ VALUES
 ('Train 10', 1, 300, 'Operational');
 
 --schedules table
-CREATE TABLE Schedules (
-    ScheduleId INT PRIMARY KEY IDENTITY(1,1),
-    TrainId INT NOT NULL REFERENCES Trains(TrainId),
-    StationId INT NOT NULL  REFERENCES Stations(StationId),
+create table Schedules (
+    ScheduleId int primary key identity(1,1),
+    TrainId int not null references Trains(TrainId),
+    StationId int not null  references Stations(StationId),
     DepartureTime TIME,
     ArrivalTime TIME,
-    DayOfWeek VARCHAR(9) NOT NULL,
-    Direction VARCHAR(4) CHECK (Direction IN ('Up', 'Down'))
+    DayOfWeek varchar(9) not null,
+    Direction varchar(4) check (Direction IN ('Up', 'Down'))
 );
 go
 
 
 -- insert Up platform schedule  Uttara North to Motijheel
 
-INSERT INTO Schedules (TrainId, StationId, DepartureTime, ArrivalTime, DayOfWeek, Direction)
-VALUES 
+insert into Schedules (TrainId, StationId, DepartureTime, ArrivalTime, DayOfWeek, Direction)
+values 
 (1, 1, '05:00:00', NULL, 'Monday', 'Up'),
 (1, 2, '05:15:00', '05:10:00', 'Monday', 'Up'),
 (1, 3, '05:30:00', '05:25:00', 'Monday', 'Up'),
@@ -128,11 +128,12 @@ VALUES
 (1, 11, '07:30:00', '07:25:00', 'Monday', 'Up'), 
 (1, 12, '07:45:00', '07:40:00', 'Monday', 'Up'), 
 (1, 13, '08:00:00', '07:55:00', 'Monday', 'Up'); 
+go
 --
 -- down train   Motijheel on Monday (Down platform)
 
-INSERT INTO Schedules (TrainId, StationId, DepartureTime, ArrivalTime, DayOfWeek, Direction)
-VALUES 
+insert into Schedules (TrainId, StationId, DepartureTime, ArrivalTime, DayOfWeek, Direction)
+values 
 (10, 13, '05:00:00', NULL, 'Monday', 'Down'), 
 (10, 12, '05:15:00', '05:10:00', 'Monday', 'Down'),
 (10, 11, '05:30:00', '05:25:00', 'Monday', 'Down'),
@@ -149,35 +150,37 @@ VALUES
 go
 
 --Passengers table
-CREATE TABLE Passengers (
-    PassengerId INT PRIMARY KEY IDENTITY(1,1),
-    Name NVARCHAR(100) NOT NULL,
-    ContactInfo NVARCHAR(150) NOT NULL,
-    TicketNumber NVARCHAR(50) NOT NULL,
-    JourneyDate DATE NOT NULL
+create table Passengers (
+    PassengerId int primary key identity(1,1),
+    Name varchar(100) not null,
+	Gender varchar(20) not null,
+	Age int not null,
+    ContactInfo varchar(150) not null,
+    TicketNumber varchar(50) not null,
+    JourneyDate DATE not null
 );
 go
 --passenger table insert value
-INSERT INTO Passengers (Name, ContactInfo, TicketNumber, JourneyDate)
-VALUES
-('Samaul', '01981154473', 'TKT001', '2024-08-17'),
-('Mimma', '01981154478', 'TKT002', '2024-08-17'),
-('Shihan', '01981154479', 'TKT003', '2024-08-17'),
-('Arafat', '01981154470', 'TKT004', '2024-08-17'),
-('Rta Akter', '01981154471', 'TKT005', '2024-08-17');
+insert into Passengers (Name, Gender, Age, ContactInfo, TicketNumber, JourneyDate)
+values
+('Samaul',   'Male',20,'01981154473', 'TKT001', '2024-08-17'),
+('Mimma',    'Female',25,'01981154478', 'TKT002', '2024-02-17'),
+('Shihan',   'Male',4,'01981154479', 'TKT003', '2024-03-17'),
+('Arafat',   'Male',30,'01981154470', 'TKT004', '2024-04-17'),
+('Rta Akter','Female',35, '01981154471', 'TKT005', '2024-10-17');
 go
 --lineStations table
-CREATE TABLE LineStations (
+create table LineStations (
 	LineStationId int identity(1,1),
-    LineId INT NOT NULL REFERENCES Lines(LineId),
-    StationId INT NOT NULL REFERENCES Stations(StationId),
-    PRIMARY KEY (LineStationId, LineId, StationId)
+    LineId int not null references Lines(LineId),
+    StationId int not null references Stations(StationId),
+    primary key (LineStationId, LineId, StationId)
 );
 go
 --insert into Line Stations table
 
-INSERT INTO LineStations ( LineId, StationId)
-VALUES
+insert into LineStations ( LineId, StationId)
+values
 (1, 1),
 (1, 2),
 (1, 3),
@@ -196,17 +199,17 @@ VALUES
 (1, 16);
 go
 --route table
-CREATE TABLE Routes (
-    RouteId INT PRIMARY KEY IDENTITY(1,1),
-    StartingStationId INT NOT NULL REFERENCES Stations(StationId),
-    EndingStationId INT NOT NULL REFERENCES Stations(StationId),
-    Distance DECIMAL(10,2) NOT NULL
+create table Routes (
+    RouteId int primary key identity(1,1),
+    StartingStationId int not null references Stations(StationId),
+    EndingStationId int not null references Stations(StationId),
+    Distance decimal(10,2) not null
 );
 go
 
 --insert into Routes table
-INSERT INTO Routes (StartingStationId, EndingStationId, Distance)
-VALUES
+insert into Routes (StartingStationId, EndingStationId, Distance)
+values
 (1, 7, 3.20),   
 (3, 5, 4.00),   
 (5, 10, 5.75),  
@@ -217,22 +220,152 @@ VALUES
 (14, 10, 4.75), 
 (10, 4, 3.20),  
 (7, 3, 5.00);   
-GO
+go
 
 --ticket table
-CREATE TABLE Tickets (
-    TicketId INT PRIMARY KEY IDENTITY(1,1),
-    PassengerId INT NOT NULL REFERENCES Passengers(PassengerId),
-    RouteId INT NOT NULL REFERENCES Routes(RouteId),
-    TrainId INT NOT NULL REFERENCES Trains(TrainId),
-    PurchaseDate DATE NOT NULL,
-    TicketPrice DECIMAL(10,2) NOT NULL
+create table Tickets (
+    TicketId int primary key identity(1,1),
+    PassengerId int not null references Passengers(PassengerId),
+    RouteId int not null references Routes(RouteId),
+    TrainId int not null references Trains(TrainId),
+    PurchaseDate DATE not null,
+    TicketPrice decimal(10,2) not null
 );
 go
 
+--log table tickets
+ create table TicketLogs(
+	TicketLogId int primary key identity(1,1),
+	TicketId int,
+	Action varchar(60),
+	ActionDate date
+);
+go
+
+--insert Tickets
+create proc procInsertTickets(	
+    @PassengerId int  ,
+    @RouteId int,
+    @TrainId int,
+    @PurchaseDate DATE,
+    @TicketPrice decimal(10,2)
+)
+as
+begin
+	insert into Tickets(PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
+	values(@PassengerId, @RouteId, @TrainId, @PurchaseDate, @TicketPrice);
+end;
+go
+
+--proc tickets update
+create proc procUpdateTickets(
+	@TicketId int,
+	@PassengerId int  ,
+    @RouteId int,
+    @TrainId int,
+    @PurchaseDate DATE,
+    @TicketPrice decimal(10,2)
+)
+as
+begin
+	update Tickets
+	set PassengerId=@PassengerId, RouteId=@RouteId, TrainId=@TrainId, PurchaseDate=@PurchaseDate, TicketPrice=@TicketPrice
+	where TicketId = @TicketId;
+end;
+go
+
+--delete ticket proc
+create proc procDeleteTicket(
+	@TicketId int
+)
+as
+begin
+	delete from Tickets
+	where TicketId = @TicketId;
+end;
+go
+--retrive ticket
+create proc procGetTickets(
+	@TicketId int
+)
+as
+begin
+	select * from Tickets
+	where TicketId = @TicketId
+end;
+go
+--ticket valid trigger
+create trigger triValidTrigger
+on Tickets
+instead of insert
+as
+begin
+ declare @Price decimal(5,2);
+ select @Price = inserted.TicketPrice from inserted;
+	if (@Price<=0)
+	begin
+		raiserror('Ticket Price must be grether then 0',16,1);
+		rollback transaction;
+	end
+	else 
+	begin
+		insert into Tickets(PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
+		select PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice from inserted;
+	end
+end;
+go
+
+--insert update delete after lot table insert
+create trigger triInsertUpdateDelete
+on Tickets
+after insert, update, delete
+as
+begin
+	declare @TicketId int, @Action varchar(60);
+	if exists(select * from inserted)
+	begin
+	select @TicketId = TicketId from inserted;
+	if exists(select * from deleted)
+	begin
+		set @Action = 'Ticket updated';
+	end
+	else 
+	begin
+		set @Action ='ticket Insert';
+	end
+	end
+	else if exists(select * from deleted)		
+	begin
+	select @TicketId =deleted.TicketId from deleted
+	 set @Action = 'ticket Delete';
+	end
+
+	--insert log
+	insert into TicketLogs(TicketId, Action, ActionDate)
+	values(@TicketId,@Action,getdate()); 
+end;
+go
+
+--insert value 
+exec procInsertTickets @PassengerId=1, @RouteId=1, @TrainId=1, @PurchaseDate='2024-08-16', @TicketPrice=30.00;
+exec procInsertTickets @PassengerId=2, @RouteId=2, @TrainId=2, @PurchaseDate='2024-08-16', @TicketPrice=40.00;
+exec procInsertTickets @PassengerId=3, @RouteId=3, @TrainId=3, @PurchaseDate='2024-08-16', @TicketPrice=50.00;
+exec procInsertTickets @PassengerId=4, @RouteId=4, @TrainId=4, @PurchaseDate='2024-08-16', @TicketPrice=60.00;
+exec procInsertTickets @PassengerId=5, @RouteId=5, @TrainId=5, @PurchaseDate='2024-08-16', @TicketPrice=45.00;
+exec procInsertTickets @PassengerId=1, @RouteId=6, @TrainId=6, @PurchaseDate='2024-08-16', @TicketPrice=35.00;
+exec procInsertTickets @PassengerId=2, @RouteId=7, @TrainId=7, @PurchaseDate='2024-08-16', @TicketPrice=55.00;
+exec procInsertTickets @PassengerId=3, @RouteId=8, @TrainId=8, @PurchaseDate='2024-08-16', @TicketPrice=50.00;
+exec procInsertTickets @PassengerId=4, @RouteId=9, @TrainId=9, @PurchaseDate='2024-08-16', @TicketPrice=40.00;
+exec procInsertTickets @PassengerId=5, @RouteId=10, @TrainId=10, @PurchaseDate='2024-08-16', @TicketPrice=60.00;
+go
+
+-- check Tickets 
+insert into Tickets (PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
+values (1, 1, 1, '2024-08-17', -10.00);
+go
 -- Insert values into Tickets table
-INSERT INTO Tickets (PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
-VALUES
+insert into Tickets (PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
+values
 (1, 1, 1, '2024-08-16', 30.00), 
 (2, 2, 2, '2024-08-16', 40.00), 
 (3, 3, 3, '2024-08-16', 50.00), 
@@ -243,13 +376,22 @@ VALUES
 (3, 8, 8, '2024-08-16', 50.00), 
 (4, 9, 9, '2024-08-16', 40.00), 
 (5, 10, 10, '2024-08-16', 60.00);
-GO
+go
+
+
+exec procUpdateTickets @TicketId=1,@PassengerId=1, @RouteId=1, @TrainId=1, @PurchaseDate='2024-08-16', @TicketPrice=30.00;
+exec procDeleteTicket @TicketId=1;
+
+select * from Tickets;
+go
+select * from TicketLogs;
+go
 ----- Create stored procedure to get tickets for a specific passenger
-CREATE PROCEDURE GetPassengerTickets
-    @PassengerId INT
-AS
-BEGIN
-    SELECT 
+create procedure GetPassengerTickets(
+    @PassengerId int)
+as
+begin
+    select 
         T.TicketId,
         T.PurchaseDate,
         R.StartingStationId,
@@ -257,90 +399,314 @@ BEGIN
         R.Distance,
         T.TicketPrice,
         TR.TrainNumber
-    FROM 
+    from 
         Tickets T
-    INNER JOIN 
-        Routes R ON T.RouteId = R.RouteId
-    INNER JOIN 
-        Trains TR ON T.TrainId = TR.TrainId
-    WHERE 
+    inner join 
+        Routes R on T.RouteId = R.RouteId
+    inner join 
+        Trains TR on T.TrainId = TR.TrainId
+    where 
         T.PassengerId = @PassengerId;
-END;
-GO
-
-
+end;
+go
 --get passenger 
-EXEC GetPassengerTickets @PassengerId = 1;
+exec GetPassengerTickets @PassengerId = 1;
 go
 
----- Create trigger to check ticket price before inserting
-CREATE TRIGGER trg_CheckTicketPrice
-ON Tickets
-AFTER INSERT
-AS
-BEGIN
-    
-    IF EXISTS (
-        SELECT 1
-        FROM inserted
-        WHERE TicketPrice <= 0
-    )
-    BEGIN
-        RAISERROR ('Ticket price must be greater than zero.', 16, 1);
-        ROLLBACK TRANSACTION;
-    END
-END;
-GO
-
--- check Tickets 
-INSERT INTO Tickets (PassengerId, RouteId, TrainId, PurchaseDate, TicketPrice)
-VALUES (1, 1, 1, '2024-08-17', -10.00);
-go
 
 -- Create a function to calculate the total fare for a ticket based on distance
-CREATE FUNCTION CalculateFare (@RouteId INT)
-RETURNS DECIMAL(10,2)
-AS
-BEGIN
-    DECLARE @Fare DECIMAL(10,2);
+create function CalculateFare (@RouteId int)
+returns decimal(10,2)
+as
+begin
+    declare @Fare decimal(10,2);
     
-    SELECT @Fare = Distance * 5 
-    FROM Routes
-    WHERE RouteId = @RouteId;
+    select @Fare = Distance * 5 
+    from Routes
+    where RouteId = @RouteId;
     
-    RETURN @Fare;
-END;
-GO
+    return @Fare;
+end;
+go
 
 -- Use the function to calculate fare for route 1
-SELECT dbo.CalculateFare(4) AS TotalFare;
-GO
+select dbo.CalculateFare(4) as TotalFare;
+go
 
 -- Add a default value to the Status column in the Stations table
-ALTER TABLE Stations
-ADD CONSTRAINT DF_Stations_Status DEFAULT 'Operational' FOR Status;
-GO
+alter table Stations
+add constraint DF_Stations_Status default 'Operational' for Status;
+go
 
--- Add a NOT NULL constraint to the Capacity column in the Trains table
-ALTER TABLE Trains
-ALTER COLUMN Capacity INT NOT NULL;
-GO
-
+-- Add a not null constraint to the Capacity column in the Trains table
+alter table Trains
+alter column Capacity int not null;
+go
 
 -- Create an index on the TrainNumber column in the Trains table
-CREATE INDEX IX_TrainNumber ON Trains (TrainNumber);
-GO
+create index In_TrainId on Trains (TrainId);
+go
 
 
 -- Create a trigger to update the total stations in the Lines table when a new station is added
-CREATE TRIGGER trg_UpdateTotalStations
-ON LineStations
+create trigger trg_UpdateTotalStations
+on LineStations
 AFTER INSERT
-AS
-BEGIN
-    UPDATE L
-    SET TotalStations = (SELECT COUNT(*) FROM LineStations WHERE LineId = L.LineId)
-    FROM Lines L
-    WHERE L.LineId IN (SELECT LineId FROM inserted);
-END;
-GO
+as
+begin
+    update L
+    set TotalStations = (select count(*) from LineStations where LineId = L.LineId)
+    from Lines L
+    where L.LineId IN (select LineId from inserted);
+end;
+go
+--distinct 
+select distinct Name
+from Passengers;
+go
+--top
+select TOP 5 *
+from Tickets
+order by PurchaseDate desc;
+go
+--top 3 passenger name
+select distinct TOP 3 Name
+from Passengers;
+go
+--where clause 
+select *
+from Passengers
+where JourneyDate > '2024-06-01';
+go 
+
+select distinct Name
+from Passengers
+where Gender = 'Female' and age > 25;
+go
+--order by
+select TOP 5 *
+from Tickets
+where RouteId = 1
+order by PurchaseDate desc;
+go
+--like 
+select *
+from Passengers
+where Name like 'A%';
+go
+--inner join 
+select P.Name, T.TicketId, T.PurchaseDate
+from Passengers P
+inner join Tickets T on P.PassengerId = T.PassengerId;
+go
+--left join 
+select P.Name, T.TicketId, T.PurchaseDate
+from Passengers P
+left join Tickets T on P.PassengerId = T.PassengerId;
+go
+--right join
+select P.Name, T.TicketId, T.PurchaseDate
+from Passengers P
+right join Tickets T on P.PassengerId = T.PassengerId;
+go
+--full join
+select P.Name, T.TicketId, T.PurchaseDate
+from Passengers P
+full outer join Tickets T on P.PassengerId = T.PassengerId;
+go
+--cross join
+select P.Name, T.TicketId
+from Passengers P
+cross join Tickets T;
+go
+--join with where clause 
+select P.Name, T.TicketId, T.PurchaseDate
+from Passengers P
+inner join Tickets T on P.PassengerId = T.PassengerId
+where T.RouteId = 1;
+--total passenger 
+select count(*) as TotalPassengers
+from Passengers;
+--total sold of ticket
+select RouteId, count(*) as TotalTicketsSold
+from Tickets
+group by RouteId;
+--max fare 
+select max(TicketPrice) as HighestFare
+from Tickets;
+go
+--
+
+select RouteId, AVG(TicketPrice) as AverageFare
+from Tickets
+group by RouteId;
+go
+--sale of ticket one day
+select PurchaseDate, count(*) as TicketsSold
+from Tickets
+group by PurchaseDate
+order by TicketsSold desc;
+go
+
+--max bye a ticket on passenger
+select P.Name, count(T.TicketId) as TicketsPurchased
+from Passengers P
+inner join Tickets T on P.PassengerId = T.PassengerId
+group by P.Name
+order by TicketsPurchased desc;
+go
+--sub queries
+select *
+from Tickets
+where TicketPrice = (select max(TicketPrice) from Tickets);
+--mimimum price of ticket
+select Name
+from Passengers
+where PassengerId IN (
+    select PassengerId
+    from Tickets
+    where TicketPrice = (select min(TicketPrice) from Tickets)
+);
+go
+
+--scalar function
+create function GetStationName (@StationId int)
+returns varchar(100)
+as
+begin
+    declare @StationName varchar(100);
+    
+    select @StationName = StationName
+    from Stations
+    where StationId = @StationId;
+    
+    return @StationName;
+end;
+go
+
+--
+select dbo.GetStationName(1) as StationName;
+go
+--table function
+create function GetTrainsByLine (@LineId int)
+returns table
+as
+return
+(
+    select TrainId, TrainNumber, Capacity, Status
+    from Trains
+    where LineId = @LineId
+);
+go
+
+select * from dbo.GetTrainsByLine(1);
+go
+
+--multi statement
+create function  GetPassengerDetails (@PassengerId int)
+returns @PassengerDetails table
+(
+    PassengerId int,
+    Name varchar(100),
+    ContactInfo varchar(150),
+    TicketNumber varchar(50),
+    JourneyDate date
+)
+as
+begin
+    insert into @PassengerDetails
+    select PassengerId, Name, ContactInfo, TicketNumber, JourneyDate
+    from Passengers
+    where PassengerId = @PassengerId;
+
+    return;
+end;
+go
+
+select * from dbo.GetPassengerDetails(1);
+go
+
+--simple view
+create view vw_StationInfo
+as
+select StationId, StationName, Location
+from Stations;
+go
+select * from vw_StationInfo;
+go
+
+
+
+--complex view encryption 
+create view vw_TrainScheduleEncryption
+with encryption
+as
+select T.TrainNumber, S.StationName, Sch.DepartureTime, Sch.ArrivalTime
+from Schedules Sch
+join Trains T on Sch.TrainId = T.TrainId
+join Stations S on Sch.StationId = S.StationId
+where Sch.Direction = 'Up';
+go
+
+select * from vw_TrainScheduleEncryption;
+go
+-- complex view schemabinding 
+create view vw_TrainScheduleSchema
+with schemabinding
+as
+select T.TrainNumber, S.StationName, Sch.DepartureTime, Sch.ArrivalTime
+from dbo.Schedules Sch
+join dbo.Trains T on Sch.TrainId = T.TrainId
+join dbo.Stations S on Sch.StationId = S.StationId
+where Sch.Direction = 'down';
+go
+
+select * from dbo.vw_TrainScheduleSchema;
+go
+
+
+-- complex view encryption schemabinding together
+create view vw_TrainScheduleTogether
+with encryption, schemabinding
+as
+select T.TrainNumber, S.StationName, Sch.DepartureTime, Sch.ArrivalTime
+from dbo.Schedules Sch
+join dbo.Trains T on Sch.TrainId = T.TrainId
+join dbo.Stations S on Sch.StationId = S.StationId
+go
+
+select * from dbo.vw_TrainScheduleTogether;
+go
+
+if @@ERROR =0
+	begin
+		print 'all comand execution successful';
+	end
+else
+	begin
+		print 'all command excution faild';
+	end
+go
+
+
+-- CTE Uttora 
+WITH UttaraStations AS
+(
+    SELECT StationId, StationName, Location
+    FROM Stations
+    WHERE Location = 'Uttara'
+)
+SELECT *
+FROM UttaraStations;
+
+-- CTE total train 
+WITH TrainCount AS
+(
+    SELECT TrainId, TrainNumber
+    FROM Trains
+)
+SELECT COUNT(*) AS TotalTrains
+FROM TrainCount;
+
+
+
