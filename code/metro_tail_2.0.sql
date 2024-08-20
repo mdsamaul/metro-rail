@@ -160,6 +160,7 @@ create table Passengers (
     JourneyDate DATE not null
 );
 go
+
 --passenger table insert value
 insert into Passengers (Name, Gender, Age, ContactInfo, TicketNumber, JourneyDate)
 values
@@ -177,6 +178,8 @@ create table LineStations (
     primary key (LineStationId, LineId, StationId)
 );
 go
+
+
 --insert into Line Stations table
 
 insert into LineStations ( LineId, StationId)
@@ -305,7 +308,6 @@ begin
 	if (@Price<=0)
 	begin
 		raiserror('Ticket Price must be grether then 0',16,1);
-		rollback transaction;
 	end
 	else 
 	begin
@@ -710,3 +712,12 @@ FROM TrainCount;
 
 
 
+if @@ERROR = 0
+begin
+    print 'All commands executed successfully';
+end
+else
+begin
+    print 'All commands execution failed';
+end
+go
